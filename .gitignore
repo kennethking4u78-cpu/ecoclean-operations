@@ -1,0 +1,6 @@
+node_modules/
+.env
+backend/uploads/
+web_dashboard/dist/
+mobile_flutter/build/
+mobile_flutter/.dart_tool/
