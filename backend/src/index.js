@@ -22,6 +22,9 @@ app.use("/uploads", express.static(uploadsDir));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
+app.get("/", (_req, res) => res.send("EcoClean API is running ✅"));
+app.get("/api", (_req, res) => res.json({ ok: true, message: "EcoClean API base ✅" }));
+
 app.use("/api/auth", authRouter);
 app.use("/api/clients", clientsRouter);
 app.use("/api/payments", paymentsRouter);
@@ -31,3 +34,4 @@ app.use("/api/users", usersRouter);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`EcoClean API running on http://localhost:${port}`));
+
