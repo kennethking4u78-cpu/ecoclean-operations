@@ -68,6 +68,22 @@ app.get("/api/reports", (_req, res) => {
     }
   ]);
 });
+app.get("/api/collections", (_req, res) => {
+  res.json([
+    {
+      truck_id: "Truck A",
+      area: "Town Center",
+      status: "completed",
+      time: "08:30 AM"
+    },
+    {
+      truck_id: "Truck B",
+      area: "Market Street",
+      status: "pending",
+      time: "10:00 AM"
+    }
+  ]);
+});
 app.get("/", (_req, res) => res.send("EcoClean API is running ✅"));
 app.get("/api", (_req, res) => res.json({ ok: true, message: "EcoClean API base ✅" }));
 /**
