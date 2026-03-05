@@ -44,7 +44,12 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir));
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
-
+app.get("/api/locations", (_req, res) => {
+  res.json([
+    { id: 1, location: "Town Center", bin_status: "half-full" },
+    { id: 2, location: "Market Street", bin_status: "full" }
+  ]);
+});
 app.get("/", (_req, res) => res.send("EcoClean API is running ✅"));
 app.get("/api", (_req, res) => res.json({ ok: true, message: "EcoClean API base ✅" }));
 /**
