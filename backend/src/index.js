@@ -50,6 +50,24 @@ app.get("/api/locations", (_req, res) => {
     { id: 2, location: "Market Street", bin_status: "full" }
   ]);
 });
+app.get("/api/reports", (_req, res) => {
+  res.json([
+    {
+      id: 1,
+      location: "Town Center",
+      issue: "Overflowing bin",
+      reported_by: "Resident",
+      status: "pending"
+    },
+    {
+      id: 2,
+      location: "Market Street",
+      issue: "Garbage not collected",
+      reported_by: "Shop Owner",
+      status: "investigating"
+    }
+  ]);
+});
 app.get("/", (_req, res) => res.send("EcoClean API is running ✅"));
 app.get("/api", (_req, res) => res.json({ ok: true, message: "EcoClean API base ✅" }));
 /**
