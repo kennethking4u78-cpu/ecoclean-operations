@@ -15,7 +15,7 @@ const app = express();
 
 const allowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
-  .map(o => o.trim())
+  .map((o) => o.trim())
   .filter(Boolean);
 
 app.use(
@@ -33,23 +33,39 @@ app.use(
     credentials: true,
   })
 );
-app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+
+app.options(
+  "*",
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: "10mb" }));
 
 const uploadsDir = path.join(__dirname, "..", "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 app.use("/uploads", express.static(uploadsDir));
 
+/* =========================
+   SIMPLE SYSTEM ENDPOINTS
+========================= */
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+/* =========================
+   WASTE MONITORING ENDPOINTS
+========================= */
+
+// 1) Locations (GET)
 app.get("/api/locations", (_req, res) => {
   res.json([
     { id: 1, location: "Town Center", bin_status: "half-full" },
-    { id: 2, location: "Market Street", bin_status: "full" }
+    { id: 2, location: "Market Street", bin_status: "full" },
   ]);
 });
+
+// 2) Reports (GET)
 app.get("/api/reports", (_req, res) => {
   res.json([
     {
@@ -57,35 +73,94 @@ app.get("/api/reports", (_req, res) => {
       location: "Town Center",
       issue: "Overflowing bin",
       reported_by: "Resident",
-      status: "pending"
+      status: "pending",
     },
     {
       id: 2,
       location: "Market Street",
       issue: "Garbage not collected",
       reported_by: "Shop Owner",
-      status: "investigating"
-    }
+      status: "investigating",
+    },
   ]);
 });
+
+// ✅ 2b) Reports (POST) - Create a new report
+app.post("/api/reports", (req, res) => {
+  const { location, issue, reported_by } = req.body || {};
+
+  if (!location || !issue) {
+    return res.status(400).json({
+      ok: false,
+      message: "location and issue are required",
+    });
+  }
+
+  const newReport = {
+    id: Date.now(),
+    location,
+    issue,
+    reported_by: reported_by || "Anonymous",
+    status: "pending",
+  };
+
+  return res.status(201).json({
+    ok: true,
+    report: newReport,
+  });
+});
+
+// 3) Collections (GET)
 app.get("/api/collections", (_req, res) => {
   res.json([
     {
       truck_id: "Truck A",
       area: "Town Center",
       status: "completed",
-      time: "08:30 AM"
+      time: "08:30 AM",
     },
     {
       truck_id: "Truck B",
       area: "Market Street",
       status: "pending",
-      time: "10:00 AM"
-    }
+      time: "10:00 AM",
+    },
   ]);
 });
+
+// ✅ 3b) Collections (POST) - Create a new collection record
+app.post("/api/collections", (req, res) => {
+  const { truck_id, area, status, time } = req.body || {};
+
+  if (!truck_id || !area) {
+    return res.status(400).json({
+      ok: false,
+      message: "truck_id and area are required",
+    });
+  }
+
+  const newCollection = {
+    id: Date.now(),
+    truck_id,
+    area,
+    status: status || "pending",
+    time: time || "N/A",
+  };
+
+  return res.status(201).json({
+    ok: true,
+    collection: newCollection,
+  });
+});
+
+/* =========================
+   BASE ROUTES
+========================= */
 app.get("/", (_req, res) => res.send("EcoClean API is running ✅"));
-app.get("/api", (_req, res) => res.json({ ok: true, message: "EcoClean API base ✅" }));
+app.get("/api", (_req, res) =>
+  res.json({ ok: true, message: "EcoClean API base ✅" })
+);
+
 /**
  * Hubtel Direct Receive Money (MoMo prompt) test route
  * - Uses Axios with HTTP Basic Auth
@@ -94,8 +169,6 @@ app.get("/api", (_req, res) => res.json({ ok: true, message: "EcoClean API base 
  *     /hubtel-test?msisdn=23324XXXXXXX&channel=mtn-gh&amount=1&callbackUrl=https%3A%2F%2Fexample.com%2Fcb
  */
 app.get("/hubtel-test", async (req, res) => {
-
-
   const baseUrl = process.env.HUBTEL_BASE_URL || "https://rmp.hubtel.com";
   const accountNumber = process.env.HUBTEL_MERCHANT_ACCOUNT_NUMBER;
   const clientId = process.env.HUBTEL_CLIENT_ID;
@@ -119,10 +192,15 @@ app.get("/hubtel-test", async (req, res) => {
   const msisdn = String(req.query.msisdn || "233XXXXXXXXX"); // replace for real test
   const channel = String(req.query.channel || "mtn-gh"); // mtn-gh | vodafone-gh | tigo-gh
   const amount = Number(req.query.amount || 1); // small amount for testing
-  const callbackUrl = String(req.query.callbackUrl || "https://example.com/hubtel-callback");
-  const clientReference = String(req.query.clientReference || `ecoclean-test-${Date.now()}`);
+  const callbackUrl = String(
+    req.query.callbackUrl || "https://example.com/hubtel-callback"
+  );
+  const clientReference = String(
+    req.query.clientReference || `ecoclean-test-${Date.now()}`
+  );
 
-const url = `${baseUrl}/v1/merchantaccount/merchants/${accountNumber}/receive/mobilemoney`;
+  const url = `${baseUrl}/v1/merchantaccount/merchants/${accountNumber}/receive/mobilemoney`;
+
   // Safe test payload (matches Hubtel "Receive Money Request" structure)
   const payload = {
     CustomerName: "EcoClean Test",
@@ -223,5 +301,6 @@ app.use("/api/routes", routesRouter);
 app.use("/api/users", usersRouter);
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`EcoClean API running on http://localhost:${port}`));
-
+app.listen(port, () =>
+  console.log(`EcoClean API running on http://localhost:${port}`)
+);
