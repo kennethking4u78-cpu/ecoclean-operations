@@ -1,0 +1,165 @@
+generator client {
+ provider = "prisma-client-js"
+}
+
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL") 
+}
+
+enum Role {
+ ADMIN
+ SUPERVISOR
+ AGENT
+ DRIVER 
+}
+
+enum PropertyType {
+ SINGLE_HOUSE
+ COMPOUND_HOUSE
+ APARTMENT
+ HOSTEL
+ SHOP 
+}
+
+enum PrelaunchStatus {
+ WAITLIST
+ RESERVED_DEPOSIT
+ CONFIRMED 
+}
+
+enum PaymentStatus {
+ UNPAID
+ DEPOSIT_PAID
+ PAID
+ PART_PAID
+ OVERDUE 
+}
+
+enum PickupStatus {
+ COLLECTED
+ MISSED
+ NO_ACCESS
+ NOT_PAID 
+}
+
+enum PaymentMethod {
+ MTN_MOMO
+ TELECEL_CASH
+ AIRTELTIGO_MONEY
+ CASH
+ BANK_TRANSFER
+ 
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  name      String
+  phone     String?
+  role      Role
+  password  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  clientsCreated Client[] @relation("ClientCreatedBy")
+
+  routesCreated Route[] @relation("RouteCreatedBy")
+  routesAssigned Route[] @relation("RouteAssignedDriver")
+}
+
+
+model Client {
+  id              String        @id @default(cuid())
+  clientCode      String        @unique
+  fullName        String
+  phone           String
+  propertyType    PropertyType
+  zone            String
+  townArea        String?
+  lat             Float?
+  lng             Float?
+  googleMapsLink  String?
+  buildingPhotoUrl String?
+  binCount        Int           @default(1)
+  binId           String?
+  wasteVolume     String?
+  landmark        String?
+  pickupFrequency String?
+  pickupDay       String?
+  prelaunchStatus PrelaunchStatus @default(WAITLIST)
+  paymentStatus   PaymentStatus  @default(UNPAID)
+  monthlyFeeGhs   Int?
+  notes           String?
+  createdById     String
+  createdBy       User          @relation("ClientCreatedBy", fields: [createdById], references: [id])
+  pickups         Pickup[]
+  payments        Payment[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  @@index([zone])
+  @@index([pickupDay])
+  @@index([phone])
+  routeStops RouteStop[]
+}
+
+model Pickup {
+  id        String      @id @default(cuid())
+  clientId  String
+  client    Client      @relation(fields: [clientId], references: [id])
+  date      DateTime    @default(now())
+  status    PickupStatus
+  notes     String?
+  photoUrl  String?
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id])
+  date        DateTime      @default(now())
+  amountGhs   Int
+  method      PaymentMethod
+  txnRef      String?
+  period      String?
+  status      String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  @@index([date])
+}
+
+
+model Route {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String?
+  pickupDay     String   // Monday..Saturday
+  zoneSummary   String?  // optional text
+  isActive      Boolean  @default(true)
+  assignedDriverId String?
+  assignedDriver   User? @relation("RouteAssignedDriver", fields: [assignedDriverId], references: [id])
+  createdById   String
+  createdBy     User     @relation("RouteCreatedBy", fields: [createdById], references: [id])
+  notes         String?
+
+  stops         RouteStop[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([pickupDay])
+  @@index([assignedDriverId])
+}
+
+model RouteStop {
+  id        String @id @default(cuid())
+  routeId   String
+  route     Route  @relation(fields: [routeId], references: [id])
+  clientId  String
+  client    Client @relation(fields: [clientId], references: [id])
+  stopOrder Int    @default(0)
+
+  @@unique([routeId, clientId])
+  @@index([routeId, stopOrder])
+}
+

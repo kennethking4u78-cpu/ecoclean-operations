@@ -1,0 +1,20 @@
+name: ecoclean_mobile
+description: EcoClean Ghana Operations Mobile (MVP)
+publish_to: "none"
+version: 0.1.0+1
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  image_picker: ^1.1.2
+  url_launcher: ^6.3.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/ecoclean_logo.png

@@ -1,117 +1,58 @@
 # =========================
-
 # NODE (Backend)
-
 # =========================
-
 node_modules/
-
 npm-debug.log*
-
 yarn-debug.log*
-
 yarn-error.log*
 
-package-lock.json
-
-
-
 # =========================
-
 # FLUTTER / DART
-
 # =========================
-
 .dart_tool/
-
 .packages
-
 .pub/
-
 .pub-cache/
-
 build/
-
 **/build/
-
 .flutter-plugins
-
 .flutter-plugins-dependencies
 
-
-
 # =========================
-
 # ANDROID
-
 # =========================
-
 android/.gradle/
-
 android/app/build/
-
 android/local.properties
 
-
-
 # =========================
-
 # IOS
-
 # =========================
-
 ios/Pods/
-
 ios/.symlinks/
-
 ios/Flutter/Flutter.framework
-
 ios/Flutter/Flutter.podspec
 
-
-
 # =========================
-
 # LOGS
-
 # =========================
-
 *.log
 
-
-
 # =========================
-
 # ENV / SECRETS
-
 # =========================
-
 .env
 
-
-
 # =========================
-
 # OS FILES
-
 # =========================
-
 .DS_Store
-
 Thumbs.db
 
-
-
 # =========================
-
 # EDITOR FILES
-
 # =========================
-
 .vscode/
-
 .idea/
-
 *.swp
-
 *.swo
