@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'theme.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
+import 'screens/map_screen.dart';
 
-void main() => runApp(const EcoCleanApp());
+void main() {
+  runApp(const EcoCleanApp());
+}
 
 class EcoCleanApp extends StatelessWidget {
   const EcoCleanApp({super.key});
@@ -16,6 +20,9 @@ class EcoCleanApp extends StatelessWidget {
       theme: ecoTheme,
       debugShowCheckedModeBanner: false,
       home: const Bootstrap(),
+      routes: {
+        '/map': (_) => const MapScreen(),
+      },
     );
   }
 }
@@ -29,6 +36,7 @@ class Bootstrap extends StatefulWidget {
 
 class _BootstrapState extends State<Bootstrap> {
   String? token;
+  bool loading = true;
 
   @override
   void initState() {
@@ -38,11 +46,27 @@ class _BootstrapState extends State<Bootstrap> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() => token = prefs.getString('ecoclean_token'));
+
+    if (!mounted) return;
+
+    setState(() {
+      token = prefs.getString('ecoclean_token');
+      loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return token == null ? LoginScreen(onLoggedIn: _load) : HomeScreen(onLogout: _load);
+    if (loading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    return token == null
+        ? LoginScreen(onLoggedIn: _load)
+        : HomeScreen(onLogout: _load);
   }
 }
